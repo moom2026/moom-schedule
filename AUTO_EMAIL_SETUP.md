@@ -50,7 +50,7 @@ const BOOKING_API_URL = "https://script.google.com/macros/s/你的部署ID/exec"
 - Apps Script 会把预约内容发送到 `shunyoutou@gmail.com`。
 - 如果想更严格地保护隐私，可以减少表单字段，例如不收集姓名，只收集联系方式和预约内容。
 
-## 已预约时间段
+## 忙碌时间段
 
 新版 Apps Script 会把已预约的 `日期 + 时间段` 保存起来。
 
@@ -58,8 +58,8 @@ const BOOKING_API_URL = "https://script.google.com/macros/s/你的部署ID/exec"
 
 - 如果还没有预约，顶部显示 `全部空闲`
 - 如果已经有人预约，顶部的 `全部空闲` 会隐藏
-- 被预约的时间段会显示为 `已预约`
-- `已预约` 的格子不能再点击
+- 被预约的时间段会显示为 `忙碌`
+- `忙碌` 的格子不能再点击
 
 如果你更新了 `apps-script/Code.gs`，需要在 Apps Script 里重新部署：
 
