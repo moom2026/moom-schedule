@@ -309,6 +309,34 @@ h2 {
   font-weight: 900;
 }
 
+.field-label {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+}
+
+.field-status {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 22px;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.required-status {
+  color: #fff;
+  background: var(--accent);
+}
+
+.optional-status {
+  color: var(--muted);
+  background: #eef2f5;
+}
+
 .booking-form input,
 .booking-form textarea {
   width: 100%;

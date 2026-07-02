@@ -60,29 +60,29 @@
             <p>Booking Request</p>
             <h2 id="booking-title">预约申请</h2>
           </div>
-          <span class="booking-note">点击表格里的空闲时间，会自动填入日期和时间段。</span>
+          <span class="booking-note">日期、时间、联系方式和预约内容为必填；预约人可选填。</span>
         </div>
 
         <form id="bookingForm" class="booking-form">
           <label>
-            日期
+            <span class="field-label">日期 <span class="field-status required-status">必填</span></span>
             <input id="bookingDate" name="预约日期" type="text" placeholder="请选择日期" required />
           </label>
           <label>
-            时间
+            <span class="field-label">时间 <span class="field-status required-status">必填</span></span>
             <input id="bookingTime" name="预约时间" type="text" placeholder="请选择时间段" required />
           </label>
           <label>
-            预约人
-            <input id="guestName" name="预约人" type="text" placeholder="请输入姓名" required />
+            <span class="field-label">预约人 <span class="field-status optional-status">选填</span></span>
+            <input id="guestName" name="预约人" type="text" placeholder="可以不填写" />
           </label>
           <label>
-            联系方式
+            <span class="field-label">联系方式 <span class="field-status required-status">必填</span></span>
             <input id="guestContact" name="联系方式" type="text" placeholder="微信、LINE、邮箱或电话" required />
           </label>
           <label class="wide-field">
-            预约内容
-            <textarea id="bookingMessage" name="预约内容" rows="4" placeholder="请简单写一下想预约的内容"></textarea>
+            <span class="field-label">预约内容 <span class="field-status required-status">必填</span></span>
+            <textarea id="bookingMessage" name="预约内容" rows="4" placeholder="请简单写一下想预约的内容" required></textarea>
           </label>
           <button class="submit-button" type="submit">提交预约申请</button>
           <p class="privacy-note">预约信息只用于通知 MooM，不会公开显示在网页上。</p>
@@ -274,9 +274,9 @@
         return {
           date: bookingDate.value,
           time: bookingTime.value,
-          name: guestName.value.trim(),
+          name: guestName.value.trim() || "未填写",
           contact: guestContact.value.trim(),
-          message: bookingMessage.value.trim() || "未填写",
+          message: bookingMessage.value.trim(),
           page: window.location.href,
         };
       }
