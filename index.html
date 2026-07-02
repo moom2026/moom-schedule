@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="MooM的空闲时间表，展示未来三个月可预约时间。" />
+    <meta name="description" content="MooM的空闲时间表，展示从今天开始两周内可预约时间。" />
     <title>MooM的空闲时间表</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
@@ -14,7 +14,7 @@
         <span>MooM</span>
       </a>
       <div class="header-meta">
-        <span id="dateRange">三个月空闲时间</span>
+        <span id="dateRange">两周空闲时间</span>
         <span>全部空闲</span>
       </div>
     </header>
@@ -28,7 +28,7 @@
       <section class="schedule-panel" aria-labelledby="schedule-title">
         <div class="panel-heading">
           <div>
-            <p>3 Months</p>
+            <p>2 Weeks</p>
             <h2 id="schedule-title">预约时间</h2>
           </div>
           <div class="status-key" aria-label="预约状态">
@@ -37,21 +37,16 @@
         </div>
 
         <div class="table-wrap" tabindex="0">
-          <table class="schedule-table" aria-label="MooM未来三个月空闲时间表">
+          <table class="schedule-table" aria-label="MooM未来两周空闲时间表">
             <thead>
               <tr>
                 <th rowspan="2" scope="col" class="date-column">日期</th>
-                <th colspan="8" scope="colgroup">预约内容</th>
+                <th colspan="3" scope="colgroup">预约内容</th>
               </tr>
               <tr>
-                <th scope="col">09:00</th>
-                <th scope="col">10:00</th>
-                <th scope="col">11:00</th>
-                <th scope="col">13:00</th>
-                <th scope="col">14:00</th>
-                <th scope="col">15:00</th>
-                <th scope="col">16:00</th>
-                <th scope="col">17:00</th>
+                <th scope="col">上午</th>
+                <th scope="col">下午</th>
+                <th scope="col">晚上</th>
               </tr>
             </thead>
             <tbody id="scheduleBody"></tbody>
@@ -65,7 +60,7 @@
             <p>Booking Request</p>
             <h2 id="booking-title">预约申请</h2>
           </div>
-          <span class="booking-note">点击表格里的空闲时间，会自动填入日期和时间。</span>
+          <span class="booking-note">点击表格里的空闲时间，会自动填入日期和时间段。</span>
         </div>
 
         <form id="bookingForm" class="booking-form">
@@ -75,7 +70,7 @@
           </label>
           <label>
             时间
-            <input id="bookingTime" name="预约时间" type="text" placeholder="请选择时间" required />
+            <input id="bookingTime" name="预约时间" type="text" placeholder="请选择时间段" required />
           </label>
           <label>
             预约人
@@ -127,7 +122,8 @@
       const gmailLink = document.querySelector("#gmailLink");
       const NOTIFY_EMAIL = "shunyoutou@gmail.com";
       const BOOKING_API_URL = "";
-      const timeSlots = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+      const dayCount = 14;
+      const timeSlots = ["上午", "下午", "晚上"];
       const weekNames = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
       function pad(value) {
@@ -138,29 +134,29 @@
         return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())}`;
       }
 
-      function addMonths(date, months) {
+      function addDays(date, days) {
         const next = new Date(date);
-        next.setMonth(next.getMonth() + months);
+        next.setDate(next.getDate() + days);
         return next;
       }
 
       function appendMonthRow(fragment, date) {
         const row = document.createElement("tr");
         row.className = "month-row";
-        row.innerHTML = `<th scope="rowgroup" colspan="9">${date.getFullYear()}年${date.getMonth() + 1}月</th>`;
+        row.innerHTML = `<th scope="rowgroup" colspan="4">${date.getFullYear()}年${date.getMonth() + 1}月</th>`;
         fragment.append(row);
       }
 
       function buildSchedule() {
         const today = new Date();
         const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        const end = addMonths(start, 3);
+        const end = addDays(start, dayCount);
         const fragment = document.createDocumentFragment();
         let cursor = new Date(start);
         let currentMonth = -1;
 
         scheduleBody.innerHTML = "";
-        dateRange.textContent = `${formatDate(start)} - ${formatDate(end)}`;
+        dateRange.textContent = `${formatDate(start)} - ${formatDate(addDays(end, -1))}`;
         updatedAt.textContent = `更新：${formatDate(start)}`;
 
         while (cursor < end) {
