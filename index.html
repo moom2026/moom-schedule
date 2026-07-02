@@ -15,7 +15,7 @@
       </a>
       <div class="header-meta">
         <span id="dateRange">两周空闲时间</span>
-        <span>全部空闲</span>
+        <span id="allAvailableBadge">全部空闲</span>
       </div>
     </header>
 
@@ -120,11 +120,13 @@
       const bookingOutput = document.querySelector("#bookingOutput");
       const copyBooking = document.querySelector("#copyBooking");
       const gmailLink = document.querySelector("#gmailLink");
+      const allAvailableBadge = document.querySelector("#allAvailableBadge");
       const NOTIFY_EMAIL = "shunyoutou@gmail.com";
       const BOOKING_API_URL = "https://script.google.com/macros/s/AKfycbxv3tDZsLSKvqfHEiNA6klPl4EQoQ8_x38QynKbtFHlrK6Lq0XC2878Fi8YK6FXyUQm/exec";
       const dayCount = 14;
       const timeSlots = ["上午", "下午", "晚上"];
       const weekNames = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+      const bookedSlots = new Set();
 
       function pad(value) {
         return String(value).padStart(2, "0");
@@ -145,6 +147,67 @@
         row.className = "month-row";
         row.innerHTML = `<th scope="rowgroup" colspan="4">${date.getFullYear()}年${date.getMonth() + 1}月</th>`;
         fragment.append(row);
+      }
+
+      function makeBookingKey(date, time) {
+        return `${date}|${time}`;
+      }
+
+      function updateAvailabilityBadge() {
+        allAvailableBadge.hidden = bookedSlots.size > 0;
+      }
+
+      function markSlotBooked(date, time) {
+        const key = makeBookingKey(date, time);
+        const button = document.querySelector(`[data-booking-key="${CSS.escape(key)}"]`);
+
+        bookedSlots.add(key);
+        updateAvailabilityBadge();
+
+        if (!button) {
+          return;
+        }
+
+        button.className = "booked-slot";
+        button.textContent = "已预约";
+        button.disabled = true;
+        button.setAttribute("aria-label", `${date} ${time} 已预约`);
+      }
+
+      function handleBookingsLoaded(data) {
+        if (!data || !Array.isArray(data.bookings)) {
+          return;
+        }
+
+        data.bookings.forEach((booking) => {
+          if (booking.date && booking.time) {
+            markSlotBooked(booking.date, booking.time);
+          }
+        });
+      }
+
+      function loadBookings() {
+        if (!BOOKING_API_URL) {
+          return;
+        }
+
+        const callbackName = `handleMoomBookings_${Date.now()}`;
+        const script = document.createElement("script");
+        const url = new URL(BOOKING_API_URL);
+
+        window[callbackName] = (data) => {
+          handleBookingsLoaded(data);
+          script.remove();
+          delete window[callbackName];
+        };
+
+        url.searchParams.set("callback", callbackName);
+        script.src = url.toString();
+        script.onerror = () => {
+          script.remove();
+          delete window[callbackName];
+        };
+        document.body.append(script);
       }
 
       function buildSchedule() {
@@ -179,8 +242,13 @@
             button.className = "available-slot";
             button.type = "button";
             button.textContent = "空闲";
+            button.dataset.bookingKey = makeBookingKey(displayDate, time);
             button.setAttribute("aria-label", `${displayDate} ${time} 空闲`);
             button.addEventListener("click", () => {
+              if (bookedSlots.has(makeBookingKey(displayDate, time))) {
+                return;
+              }
+
               bookingDate.value = displayDate;
               bookingTime.value = time;
               bookingForm.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -196,9 +264,11 @@
         }
 
         scheduleBody.append(fragment);
+        updateAvailabilityBadge();
       }
 
       buildSchedule();
+      loadBookings();
 
       function buildBookingPayload() {
         return {
@@ -267,6 +337,7 @@
             },
             body: JSON.stringify(payload),
           });
+          markSlotBooked(payload.date, payload.time);
           bookingForm.reset();
           bookingResult.hidden = true;
           formStatus.textContent = "预约申请已提交。MooM 会收到邮件通知。";

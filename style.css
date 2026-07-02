@@ -258,6 +258,21 @@ h2 {
   outline: none;
 }
 
+.booked-slot {
+  display: inline-flex;
+  width: 100%;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d8e1e6;
+  border-radius: 8px;
+  color: #697782;
+  background: #eef2f5;
+  cursor: not-allowed;
+  font: inherit;
+  font-weight: 900;
+}
+
 .booking-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

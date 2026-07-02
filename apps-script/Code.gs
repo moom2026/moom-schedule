@@ -1,4 +1,5 @@
 const NOTIFY_EMAIL = "shunyoutou@gmail.com";
+const BOOKINGS_KEY = "bookings";
 
 function doPost(e) {
   try {
@@ -15,6 +16,20 @@ function doPost(e) {
     if (!booking.date || !booking.time || !booking.name || !booking.contact) {
       return jsonResponse({ ok: false, message: "missing required fields" });
     }
+
+    const key = makeBookingKey(booking.date, booking.time);
+    const bookings = getBookings();
+
+    if (bookings[key]) {
+      return jsonResponse({ ok: false, message: "already booked" });
+    }
+
+    bookings[key] = {
+      date: booking.date,
+      time: booking.time,
+      createdAt: new Date().toISOString(),
+    };
+    saveBookings(bookings);
 
     const subject = `MooM预约申请：${booking.date} ${booking.time}`;
     const body = [
@@ -44,8 +59,18 @@ function doPost(e) {
   }
 }
 
-function doGet() {
-  return jsonResponse({ ok: true, message: "MooM booking mailer is running." });
+function doGet(e) {
+  const bookings = Object.values(getBookings());
+  const callback = e && e.parameter && e.parameter.callback;
+  const data = { ok: true, bookings };
+
+  if (callback) {
+    return ContentService
+      .createTextOutput(`${callback}(${JSON.stringify(data)});`)
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+
+  return jsonResponse(data);
 }
 
 function sanitize(value) {
@@ -56,4 +81,17 @@ function jsonResponse(data) {
   return ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function makeBookingKey(date, time) {
+  return `${date}|${time}`;
+}
+
+function getBookings() {
+  const raw = PropertiesService.getScriptProperties().getProperty(BOOKINGS_KEY);
+  return raw ? JSON.parse(raw) : {};
+}
+
+function saveBookings(bookings) {
+  PropertiesService.getScriptProperties().setProperty(BOOKINGS_KEY, JSON.stringify(bookings));
 }
